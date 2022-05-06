@@ -13,17 +13,34 @@ public class Spring {
         this.k=k;
     }
     public double[] move(double t, double dt, double x0, double v0){
-        return new double[1];
+        return move(0, t, dt, x0, v0, 1);
     }
     public double[] move(double t, double dt, double x0){
-        return move(t, dt, x0, 0);
+        return move(0, t, dt, x0, 0, 1);
     }
     public double[] move(double t0, double t1, double dt, double x0, double v0){
-        return new double[1];
+        return move(t0, t1, dt, x0, v0, 1);
     }
     public double[] move(double t0, double t1, double dt, double x0, double v0, double m){
-        return new double[1];
+        int numOfPoints=(int)((t1-t0)/dt);
+        double[] posArray=new double[numOfPoints];
+        double omega=Math.sqrt(this.k/m);
+        for(int i=0; i<numOfPoints; i++){
+            v0+=(-1)*this.k*x0*dt/m;
+            double arg=omega*(t0+i*dt);
+            x0=x0*Math.cos(arg)+v0/omega*Math.sin(arg);
+            posArray[i]=x0;
+        }
+
+        return posArray;
     }
 
-    //To be continued
+    public Spring inSeries(Spring that){
+        double newK=(this.k*that.k)/(this.k+that.k);
+        return new Spring(newK);
+    }
+    public Spring inParallel(Spring that){
+        double newK=this.k+that.k;
+        return new Spring(newK);
+    }
 }
