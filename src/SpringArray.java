@@ -2,6 +2,7 @@ import java.util.Stack;
 
 public class SpringArray {
 
+    private static int springIndex=0;
     public static Spring equivalentSpring(String springExpr){
         int count=0;
         for(int i=0; i<springExpr.length()-2; i++){
@@ -12,30 +13,41 @@ public class SpringArray {
         for(int i=0; i<count; i++){
             springs[i]=new Spring();
         }
-        return equivalentSpring(springExpr, springs, 0, springExpr.length());
+        springIndex=0;
+        return equivalentSpring(new StringBuilder(springExpr), springs, 0);
     }
     public static Spring equivalentSpring(String springExpr, Spring[] springs){
-        return equivalentSpring(springExpr, springs, 0, springExpr.length());
+        springIndex=0;
+        return equivalentSpring(new StringBuilder(springExpr), springs, 0);
     }
 
-    //This is not working
-    //(but it will)
-    private static int springIndex=0;
-    public static Spring equivalentSpring(String springExpr, Spring[] springs, int exprStartIndex, int exprEndIndex) {
-        if(exprEndIndex-exprStartIndex==1){
+    public static Spring equivalentSpring(StringBuilder springExpr, Spring[] springs, int exprStartIndex) {
+        if(springExpr.substring(exprStartIndex, exprStartIndex+2).equals("[]")){
             return springs[springIndex++];
         }
-        int closingIndex=getClosingIndex(springExpr, exprStartIndex+1, springExpr.charAt(exprStartIndex+1));
-        if(springExpr.charAt(exprStartIndex)=='{'){
-            return equivalentSpring(springExpr, springs, exprStartIndex, closingIndex)
-                    .inSeries(equivalentSpring(springExpr, springs, closingIndex+1, exprEndIndex-1));
+        int closingIndex=getClosingIndex(springExpr, exprStartIndex+1);
+        char scope=springExpr.charAt(exprStartIndex);
+
+        if(isClosing(springExpr.charAt(closingIndex+1)))
+            return springs[springIndex++];
+        StringBuilder modifiedString=createExpr(springExpr, closingIndex+1, scope);
+        if(scope=='{'){
+            return equivalentSpring(springExpr, springs, exprStartIndex+1)
+                    .inSeries(equivalentSpring(modifiedString, springs, getOpeningIndex(springExpr,closingIndex+1)));
         }
-        return equivalentSpring(springExpr, springs, exprStartIndex, closingIndex)
-                    .inSeries(equivalentSpring(springExpr, springs, closingIndex, exprEndIndex));
+        return equivalentSpring(springExpr, springs, exprStartIndex+1)
+                .inParallel(equivalentSpring(modifiedString, springs, getOpeningIndex(springExpr,closingIndex+1)));
 
     }
-    public static int getClosingIndex(String expr, int pos, char c){
-        char oppositeChar=getOppositeChar(c);
+    public static StringBuilder createExpr(StringBuilder expr, int place, char c){
+        return expr.insert(place, c);
+    }
+    public static boolean isClosing(char c){
+        return c=='}'||c==']';
+    }
+    public static int getClosingIndex(StringBuilder expr, int pos){
+        String c=expr.substring(pos, pos+1);
+        String oppositeChar=getOppositeChar(c);
         int closingIndex=expr.indexOf(oppositeChar,pos+1);
         int firstOpenIndex=expr.indexOf(c,pos+1);
         while(!(firstOpenIndex==-1 || closingIndex<firstOpenIndex)){
@@ -44,13 +56,18 @@ public class SpringArray {
         }
         return closingIndex;
     }
-    private static char getOppositeChar(char c){
-        if(c=='{')
-            return '}';
-        if(c=='[')
-            return ']';
-        if(c==']')
-            return '[';
-        return '{';
+    public static int getOpeningIndex(StringBuilder expr, int pos){
+        int firstBrace=expr.indexOf("[", pos);
+        int firstBracket=expr.indexOf("{", pos);
+        if(firstBrace==-1)
+            return firstBracket;
+        if(firstBracket==-1)
+            return firstBrace;
+        return Math.min(firstBrace,firstBracket );
+    }
+    private static String getOppositeChar(String c){
+        if(c.equals("{"))
+            return "}";
+        return "]";
     }
     }
