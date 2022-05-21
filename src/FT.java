@@ -1,5 +1,9 @@
 public class FT {
 
+
+    /**
+     * The code is taken from the textbook provided (H. Gould, J. Tobochnik, W. Christian)
+     */
     public static void transform(double[] real, double[] imag) {
         int N = real.length;
         int pow = 0;

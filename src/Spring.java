@@ -26,10 +26,8 @@ public class Spring {
         double[] posArray=new double[numOfPoints];
         double omega=Math.sqrt(this.k/m);
         for(int i=0; i<numOfPoints; i++){
-            v0+=(-1)*this.k*x0*dt/m;
             double arg=omega*(t0+i*dt);
-            x0=x0*Math.cos(arg)+v0/omega*Math.sin(arg);
-            posArray[i]=x0;
+            posArray[i]=x0*Math.cos(arg)+v0/omega*Math.sin(arg);
         }
 
         return posArray;
